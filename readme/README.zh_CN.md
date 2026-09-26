@@ -4,7 +4,7 @@ A Clean, Beautiful TimeTable APP -->
 <h1 align="center">Monet Timetable</h1>
 
 <div align="center">
-  <p><strong>A Clean, Beautiful TimeTable APP For University Students</strong></p>
+  <p><strong>为高校学生准备的课表/便签APP | 简洁、美观、高效</strong></p>
 
   <p>
     <img alt="Kotlin" src="https://img.shields.io/badge/Kotlin-2.2.10-7F52FF?logo=kotlin&amp;logoColor=white" />
@@ -14,7 +14,9 @@ A Clean, Beautiful TimeTable APP -->
   </p>
 </div>
 
-[简体中文](readme/README.zh_CN.md) 
+---
+  
+[English](../README.md)  
 
 ---
 
