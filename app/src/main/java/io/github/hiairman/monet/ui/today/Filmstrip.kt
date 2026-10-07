@@ -5,6 +5,7 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -88,14 +89,26 @@ fun Filmstrip(
 
     var viewportWidthPx by remember { mutableIntStateOf(0) }
 
+    // Half a viewport of blank canvas goes at each end of the strip, inside the
+    // scroll container. Without it the pointer could never reach the ends of the day:
+    // a scroll container cannot scroll past its own edge, so at scroll 0 the centre of
+    // the viewport would already be half a viewport *into* the timeline — roughly
+    // 10:13 at 1.5dp per minute — and 18:00 would be equally unreachable at the far
+    // end. Same problem as the number wheels in the add dialog, same fix: pad the
+    // content so the first and last values can both reach the middle.
+    val edgePad = with(density) { (viewportWidthPx / 2).toDp() }
+
     // The pointer only becomes meaningful once the strip has been measured.
     // Until then, we hold back, so the notes panel doesn't flash the 08:00 class.
     var ready by remember { mutableStateOf(false) }
 
+    // Because the leading pad is exactly half a viewport, scroll value 0 already puts
+    // 08:00 under the pointer and the scroll offset *is* the distance from the start of
+    // the timeline. No correction term — the padding did the arithmetic for us.
+    // (Change the pad above and this line has to change with it.)
     val pointedTime by remember {
         derivedStateOf {
-            val centrePx = scrollState.value + viewportWidthPx / 2f
-            val minutes = (centrePx / dpPerMinutePx).roundToInt()
+            val minutes = (scrollState.value / dpPerMinutePx).roundToInt()
             TIMELINE_START.plusMinutes(minutes.toLong())
         }
     }
@@ -108,9 +121,11 @@ fun Filmstrip(
     LaunchedEffect(scrollState.maxValue, viewportWidthPx) {
         if (viewportWidthPx == 0) return@LaunchedEffect
         if (scrollState.maxValue > 0) {
+            // Scrolling to "now"'s offset from 08:00 centres it, for the same reason
+            // the pointer maths above needs no correction: the pad ate the half-viewport
+            // term. maxValue is now exactly TIMELINE_WIDTH, so this can reach both ends.
             val nowPx = with(density) { now.toLocalTime().xOffset().toPx() }
-            val target = (nowPx - viewportWidthPx / 2f).roundToInt()
-            scrollState.scrollTo(target.coerceIn(0, scrollState.maxValue))
+            scrollState.scrollTo(nowPx.roundToInt().coerceIn(0, scrollState.maxValue))
         }
         ready = true
     }
@@ -134,6 +149,9 @@ fun Filmstrip(
                     .horizontalScroll(scrollState)
                     .height(STRIP_HEIGHT_DP.dp),
             ) {
+                // Blank run-in, so 08:00 can be scrolled all the way to the pointer.
+                Spacer(Modifier.width(edgePad))
+
                 // Fixed-width canvas; frames place themselves inside it.
                 Box(modifier = Modifier.width(TIMELINE_WIDTH).fillMaxHeight()) {
                     courses.forEach { course ->
@@ -144,6 +162,9 @@ fun Filmstrip(
                         )
                     }
                 }
+
+                // Blank run-out, so 18:00 can be scrolled back to the pointer.
+                Spacer(Modifier.width(edgePad))
             }
 
             // The pointer: outside the scroll container, so it never moves.
