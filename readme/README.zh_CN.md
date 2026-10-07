@@ -21,3 +21,16 @@ A Clean, Beautiful TimeTable APP -->
 ---
 
 [![Star History Chart](https://app.repohistory.com/api/svg?repo=HiAirman/TimeTable&type=Date&background=FFFFFF&color=f8d862)](https://app.repohistory.com/star-history)
+
+---
+## 快速下载和使用
+
+## 项目简介
+
+### 项目速览
+
+### 主要功能
+
+## 如何协助
+
+## FAQ | 常见问题
